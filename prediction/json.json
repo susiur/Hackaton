@@ -1,0 +1,431 @@
+{
+    "user_id": 1,
+    "total_prediccion": 63.0,
+    "ajuste": 71.0,
+    "prediccion_por_dia": [
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 23,
+            "day_of_week": 5,
+            "prediction": 1.01
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 24,
+            "day_of_week": 6,
+            "prediction": 1.03
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 25,
+            "day_of_week": 0,
+            "prediction": 1.02
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 26,
+            "day_of_week": 1,
+            "prediction": 1.05
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 27,
+            "day_of_week": 2,
+            "prediction": 1.12
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 28,
+            "day_of_week": 3,
+            "prediction": 1.24
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 29,
+            "day_of_week": 4,
+            "prediction": 1.46
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 30,
+            "day_of_week": 5,
+            "prediction": 1.56
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 1,
+            "day": 31,
+            "day_of_week": 6,
+            "prediction": 1.61
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 1,
+            "day_of_week": 0,
+            "prediction": 1.08
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 2,
+            "day_of_week": 1,
+            "prediction": 1.04
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 3,
+            "day_of_week": 2,
+            "prediction": 1.0
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 4,
+            "day_of_week": 3,
+            "prediction": 1.01
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 5,
+            "day_of_week": 4,
+            "prediction": 1.02
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 6,
+            "day_of_week": 5,
+            "prediction": 1.12
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 7,
+            "day_of_week": 6,
+            "prediction": 1.52
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 8,
+            "day_of_week": 0,
+            "prediction": 1.16
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 9,
+            "day_of_week": 1,
+            "prediction": 1.14
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 10,
+            "day_of_week": 2,
+            "prediction": 1.11
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 11,
+            "day_of_week": 3,
+            "prediction": 1.32
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 12,
+            "day_of_week": 4,
+            "prediction": 1.31
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 13,
+            "day_of_week": 5,
+            "prediction": 1.26
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 14,
+            "day_of_week": 6,
+            "prediction": 1.2
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 15,
+            "day_of_week": 0,
+            "prediction": 1.09
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 16,
+            "day_of_week": 1,
+            "prediction": 1.76
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 17,
+            "day_of_week": 2,
+            "prediction": 1.35
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 18,
+            "day_of_week": 3,
+            "prediction": 1.21
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 19,
+            "day_of_week": 4,
+            "prediction": 1.04
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 20,
+            "day_of_week": 5,
+            "prediction": 1.1
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 21,
+            "day_of_week": 6,
+            "prediction": 1.22
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 22,
+            "day_of_week": 0,
+            "prediction": 1.15
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 23,
+            "day_of_week": 1,
+            "prediction": 1.0
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 24,
+            "day_of_week": 2,
+            "prediction": 1.0
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 25,
+            "day_of_week": 3,
+            "prediction": 1.01
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 26,
+            "day_of_week": 4,
+            "prediction": 1.0
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 27,
+            "day_of_week": 5,
+            "prediction": 1.21
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 28,
+            "day_of_week": 6,
+            "prediction": 1.23
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 2,
+            "day": 29,
+            "day_of_week": 0,
+            "prediction": 1.18
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 1,
+            "day_of_week": 1,
+            "prediction": 1.13
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 2,
+            "day_of_week": 2,
+            "prediction": 1.02
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 3,
+            "day_of_week": 3,
+            "prediction": 1.02
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 4,
+            "day_of_week": 4,
+            "prediction": 1.04
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 5,
+            "day_of_week": 5,
+            "prediction": 1.06
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 6,
+            "day_of_week": 6,
+            "prediction": 1.21
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 7,
+            "day_of_week": 0,
+            "prediction": 1.46
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 8,
+            "day_of_week": 1,
+            "prediction": 1.42
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 9,
+            "day_of_week": 2,
+            "prediction": 1.22
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 10,
+            "day_of_week": 3,
+            "prediction": 1.4
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 11,
+            "day_of_week": 4,
+            "prediction": 1.15
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 12,
+            "day_of_week": 5,
+            "prediction": 1.17
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 13,
+            "day_of_week": 6,
+            "prediction": 1.29
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 14,
+            "day_of_week": 0,
+            "prediction": 1.14
+        },
+        {
+            "product_id": 1,
+            "year": 2016,
+            "month": 3,
+            "day": 15,
+            "day_of_week": 1,
+            "prediction": 1.28
+        }
+    ]
+}
