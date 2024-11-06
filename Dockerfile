@@ -5,23 +5,41 @@ FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Instala dependencias para Node.js (Next.js)
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg2 \
+    lsb-release \
+    ca-certificates
+
+# Instala Node.js
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs
+
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Copia el archivo de dependencias y lo instala
-COPY requirements.txt .
+COPY requirements.txt ./backend/requirements.txt
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r backend/requirements.txt
 
-# Copia el resto del código de la aplicación al contenedor
-COPY . .
+# Copia el frontend de Next.js y las dependencias
+COPY frontend/package.json frontend/package-lock.json ./frontend/
 
-# Copia el archivo .env al contenedor
-COPY backend/.env .
+# Instala dependencias de Next.js
+WORKDIR /app/frontend
+RUN npm install
 
-# Expone el puerto en el que correrá la aplicación Flask
-EXPOSE 5000
+# Copia el código del backend y frontend al contenedor
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
 
-# Define el comando por defecto para ejecutar la aplicación
-CMD ["python", "app.py"]
+# Copia el archivo .env del backend
+COPY backend/.env ./backend/
+
+# Expone los puertos para ambos servicios (Flask y Next.js)
+EXPOSE 5000 3000
+
+# Usamos un script de inicio para ejecutar ambos servicios (Flask + Next.js)
+CMD ["sh", "-c", "python backend/app.py & cd frontend && npm run dev"]
