@@ -8,7 +8,7 @@ import { useState } from 'react';
 type SupplierFormProps = {
   initialSupplier?: { id?: number; name: string; contactNumber?: string };
   onSubmit: (supplier: {
-    id?: number;
+    id: number;
     name: string;
     contactNumber?: string;
   }) => void;
@@ -53,7 +53,10 @@ export default function SupplierForm({
         </div>
       </div>
       <div className="flex justify-end space-x-2">
-        <Button type="button" onClick={() => onSubmit(supplier)}>
+        <Button
+          type="button"
+          onClick={() => onSubmit({ ...supplier, id: supplier.id || 0 })}
+        >
           Guardar Proveedor
         </Button>
         <Button variant="ghost" type="button" onClick={onClose}>
