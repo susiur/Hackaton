@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
+    "@auth0/auth0-react": "^2.2.4",
+    "@auth0/nextjs-auth0": "^3.5.0",
     "@prisma/client": "^5.21.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",

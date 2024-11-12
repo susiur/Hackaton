@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SupplierList from './SupplierList';
 import SupplierForm from './SupplierForm';
 import {
@@ -12,42 +12,79 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SupplierPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [suppliers, setSuppliers] = useState([
-    { id: 1, name: 'Supplier A', contactNumber: '123-456-789' },
-    { id: 2, name: 'Supplier B', contactNumber: '987-654-321' },
-    { id: 3, name: 'Supplier C' },
-    { id: 4, name: 'Supplier D', contactNumber: '555-666-777' },
-  ]);
+  const { userId } = useAuth();
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAddSupplier = (newSupplier: {
-    name: string;
-    contactNumber?: string;
-  }) => {
-    const newId = suppliers.length
-      ? Math.max(...suppliers.map((s) => s.id)) + 1
-      : 1;
-    setSuppliers((prev) => [...prev, { id: newId, ...newSupplier }]);
-    setIsAddDialogOpen(false);
+  // Obtener proveedores
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchSuppliers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`http://localhost:5000/providers?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error('Error al obtener proveedores');
+        }
+        const data = await response.json();
+        setSuppliers(data);
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, [userId]);
+
+  // Crear proveedor
+  const handleAddSupplier = async (newSupplier: any) => {
+    try {
+      const response = await fetch(`http://localhost:5000/providers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, ...newSupplier }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear el proveedor');
+      }
+
+      const data = await response.json();
+      setSuppliers((prev) => [...prev, { id: data.id, ...newSupplier }]);
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+    }
   };
 
-  const handleEditSupplier = (updatedSupplier: {
-    id: number;
-    name: string;
-    contactNumber?: string;
-  }) => {
-    setSuppliers((prev) =>
-      prev.map((supplier) =>
-        supplier.id === updatedSupplier.id ? updatedSupplier : supplier
-      )
-    );
+  // Eliminar proveedor
+  const handleDeleteSupplier = async (id: any) => {
+    try {
+      const response = await fetch(`http://localhost:5000/providers/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el proveedor');
+      }
+
+      setSuppliers((prev) => prev.filter((supplier) => supplier.id !== id));
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
+    }
   };
 
-  const handleDeleteSupplier = (id: number) => {
-    setSuppliers((prev) => prev.filter((supplier) => supplier.id !== id));
-  };
+  if (!userId) {
+    return <div>No estás autenticado.</div>;
+  }
 
   return (
     <div className="w-full h-full min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
@@ -73,11 +110,18 @@ export default function SupplierPage() {
             </DialogContent>
           </Dialog>
         </div>
-        <SupplierList
-          suppliers={suppliers}
-          onEditSupplier={handleEditSupplier}
-          onDeleteSupplier={handleDeleteSupplier}
-        />
+
+        {isLoading ? (
+          <div>Cargando proveedores...</div>
+        ) : error ? (
+          <div className="text-red-500">{error}</div>
+        ) : (
+          <SupplierList
+            suppliers={suppliers}
+            onEditSupplier={handleAddSupplier}
+            onDeleteSupplier={handleDeleteSupplier}
+          />
+        )}
       </div>
     </div>
   );

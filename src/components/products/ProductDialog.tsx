@@ -13,8 +13,8 @@ type ProductDialogProps = {
   type: 'add' | 'edit';
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  initialProduct?: { name: string; stock: number; price: number };
-  onSubmit: (product: { name: string; stock: number; price: number }) => void;
+  initialProduct?: { name: string; quantity: number; price: number } | null;
+  onSubmit: (product: { name: string; quantity: number; price: number }) => void;
 };
 
 export default function ProductDialog({

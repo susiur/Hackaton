@@ -71,18 +71,20 @@ const mockData = [
 
 type ChartDisplayProps = {
   productId: number | null;
-  timeFilter: 'day' | 'month' | 'year';
+  timeFilter: 'day' | 'month' | 'year'
+  predictedData: any[];
 };
 
 export default function ChartDisplay({
   productId,
   timeFilter,
+  predictedData
 }: ChartDisplayProps) {
-  const [filteredData, setFilteredData] = useState<typeof mockData>([]);
+  const [filteredData, setFilteredData] = useState<typeof predictedData>([]);
 
   useEffect(() => {
     if (productId !== null) {
-      const filtered = mockData.filter((data) => data.productId === productId);
+      const filtered = predictedData.filter((data) => data.productId === productId);
 
       // Agrupar datos según el filtro de tiempo
       let groupedData = filtered;
@@ -100,6 +102,14 @@ export default function ChartDisplay({
           (acc, item) => {
             const year = dayjs(item.date).format('YYYY');
             acc[year] = (acc[year] || 0) + item.quantity;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
+      } else if (timeFilter === 'day') {
+        groupedData = filtered.reduce(
+          (acc, item) => {
+            acc[item.date] = item.quantity;
             return acc;
           },
           {} as Record<string, number>

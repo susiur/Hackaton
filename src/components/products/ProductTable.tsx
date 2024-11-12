@@ -31,8 +31,8 @@ export default function ProductTable({ onEdit }: Props) {
         {products.map((product) => (
           <TableRow key={product.id}>
             <TableCell className="font-medium">{product.name}</TableCell>
-            <TableCell>{product.stock}</TableCell>
-            <TableCell>${product.price.toFixed(2)}</TableCell>
+            <TableCell>{product.quantity}</TableCell>
+            <TableCell>${product.price}</TableCell>
             <TableCell>
               <Button variant="ghost" size="sm" onClick={() => onEdit(product)}>
                 <Edit className="h-4 w-4" />

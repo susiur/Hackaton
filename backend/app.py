@@ -7,6 +7,7 @@ from datetime import date
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
+from main import ModeloDemanda
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -34,41 +35,77 @@ except Error as e:
     print('Error al conectar a MySQL:', e)
 
 
-def validar_usuario(user_id):
+def validar_usuario(userId):
     """
-    Verifica si el user_id proporcionado existe en la base de datos.
+    Verifica si el userId proporcionado existe en la base de datos.
     """
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT id FROM user WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id FROM User WHERE id = %s", (userId, ))
         return cursor.fetchone() is not None
     except Error as e:
         print('Error al validar el usuario:', e)
         return False
-
+ 
 def obtener_usuario():
     """
-    Obtiene el user_id desde los parámetros de la solicitud.
+    Obtiene el userId desde los parámetros de la solicitud.
     """
-    user_id = request.args.get('user_id') or (request.get_json() and request.get_json().get('user_id'))
-    if not user_id:
-        return None, jsonify({'error': 'user_id es requerido.'}), 400
-    if not validar_usuario(user_id):
-        return None, jsonify({'error': 'user_id no corresponde a ningún usuario existente.'}), 400
-    return user_id, None, None
+    userId = request.args.get('userId') or (request.get_json() and request.get_json().get('userId'))
+    if not userId:
+        return None, jsonify({'error': 'userId es requerido.'}), 400
+    if not validar_usuario(userId):
+        return None, jsonify({'error': f'userId {userId} no corresponde a ningún usuario existente.'}), 400
+    return userId, None, None
 
-def get_or_create_null_provider(user_id):
+# Agregar el endpoint para predicción
+@app.route('/predict', methods=['POST'])
+def predecir_demanda():
+    userId, error_response, status_code = obtener_usuario()
+    if error_response:
+        return error_response, status_code
+    data = request.get_json()
+    required_fields = ['userId', 'start_date', 'end_date']
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'El campo "{field}" es requerido.'}), 400
+    # Extraer los parámetros
+    userId = data['userId']
+    start_date = data['start_date']
+    end_date = data['end_date']
+
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id
+            FROM Product
+            WHERE userId = %s
+        """, (userId,))
+        productos_usuario = cursor.fetchall()
+        productos_usuario = [producto['id'] for producto in productos_usuario]
+        modelo_demanda = ModeloDemanda(userId)
+
+        predicciones = modelo_demanda.run(start_date, end_date, productos_usuario)
+
+        # Devolver las predicciones como respuesta
+        return jsonify(predicciones), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def get_or_create_null_provider(userId):
     """
     Obtiene el proveedor 'Nulo'. Si no existe, lo crea asignándolo al usuario proporcionado.
     Retorna el ID del proveedor 'Nulo'.
     """
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT id FROM supplier WHERE name = %s AND user_id = %s", ('Nulo', user_id))
+        cursor.execute("SELECT id FROM Supplier WHERE name = %s AND userId = %s", ('Nulo', userId))
         proveedor_nulo = cursor.fetchone()
         if not proveedor_nulo:
-            insert_null = "INSERT INTO supplier (user_id, name, contact_number) VALUES (%s, %s, %s)"
-            cursor.execute(insert_null, (user_id, 'Nulo', None))
+            insert_null = "INSERT INTO Supplier (userId, name, contactNumber) VALUES (%s, %s, %s)"
+            cursor.execute(insert_null, (userId, 'Nulo', None))
             conexion.commit()
             proveedor_nulo_id = cursor.lastrowid
             print(f"Proveedor 'Nulo' creado con ID {proveedor_nulo_id}")
@@ -84,7 +121,7 @@ def get_or_create_null_provider(user_id):
 def obtener_usuario_por_id(id):
     try:
         cursor = conexion.cursor(dictionary=True)
-        cursor.execute("SELECT id, mail, business_name FROM user WHERE id = %s", (id,))
+        cursor.execute("SELECT id, mail, businessName FROM User WHERE id = %s", (id,))
         usuario = cursor.fetchone()
         if usuario:
             return jsonify(usuario), 200
@@ -96,17 +133,17 @@ def obtener_usuario_por_id(id):
 # Obtener todos los proveedores de un usuario
 @app.route('/providers', methods=['GET'])
 def obtener_proveedores():
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
     try:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute("""
-            SELECT supplier.id, supplier.name, supplier.contact_number
-            FROM supplier
-            WHERE supplier.user_id = %s
-        """, (user_id,))
+            SELECT Supplier.id, Supplier.name, Supplier.contactNumber
+            FROM Supplier
+            WHERE Supplier.userId = %s
+        """, (userId,))
         proveedores = cursor.fetchall()
         return jsonify(proveedores), 200
     except Error as e:
@@ -116,26 +153,26 @@ def obtener_proveedores():
 @app.route('/providers', methods=['POST'])
 def crear_proveedor():
     data = request.get_json()
-    required_fields = ['user_id', 'name']
+    required_fields = ['userId', 'name']
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'El campo "{field}" es requerido.'}), 400
 
-    user_id = data['user_id']
-    if not validar_usuario(user_id):
-        return jsonify({'error': 'user_id no corresponde a ningún usuario existente.'}), 400
+    userId = data['userId']
+    if not validar_usuario(userId):
+        return jsonify({'error': 'userId no corresponde a ningún usuario existente.'}), 400
 
     try:
         cursor = conexion.cursor()
 
         insert_supplier = """
-            INSERT INTO supplier (user_id, name, contact_number)
+            INSERT INTO Supplier (userId, name, contactNumber)
             VALUES (%s, %s, %s)
         """
         supplier_data = (
-            user_id,
+            userId,
             data['name'],
-            data.get('contact_number')
+            data.get('contactNumber')
         )
         cursor.execute(insert_supplier, supplier_data)
         conexion.commit()
@@ -147,7 +184,7 @@ def crear_proveedor():
 # Eliminar un proveedor
 @app.route('/providers/{id}', methods=['DELETE'])
 def eliminar_proveedor(id):
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
@@ -155,27 +192,27 @@ def eliminar_proveedor(id):
         cursor = conexion.cursor()
 
         # Verificar si el proveedor existe y pertenece al usuario
-        cursor.execute("SELECT * FROM supplier WHERE id = %s AND user_id = %s", (id, user_id))
+        cursor.execute("SELECT * FROM Supplier WHERE id = %s AND userId = %s", (id, userId))
         proveedor = cursor.fetchone()
         if not proveedor:
             return jsonify({'error': 'Proveedor no encontrado o no pertenece al usuario especificado.'}), 404
 
         # Obtener o crear el proveedor 'Nulo' para este usuario
-        proveedor_nulo_id = get_or_create_null_provider(user_id)
+        proveedor_nulo_id = get_or_create_null_provider(userId)
         if proveedor_nulo_id is None:
             return jsonify({'error': 'No se pudo obtener o crear el proveedor "Nulo".'}), 500
 
-        # Actualizar productos que tienen este proveedor estableciendo provider_id al proveedor 'Nulo'
+        # Actualizar productos que tienen este proveedor estableciendo providerId al proveedor 'Nulo'
         actualizar_productos = """
             UPDATE product
-            SET provider_id = %s
-            WHERE provider_id = %s AND user_id = %s
+            SET providerId = %s
+            WHERE providerId = %s AND userId = %s
         """
-        cursor.execute(actualizar_productos, (proveedor_nulo_id, id, user_id))
+        cursor.execute(actualizar_productos, (proveedor_nulo_id, id, userId))
         conexion.commit()
 
         # Eliminar el proveedor
-        cursor.execute("DELETE FROM supplier WHERE id = %s AND user_id = %s", (id, user_id))
+        cursor.execute("DELETE FROM Supplier WHERE id = %s AND userId = %s", (id, userId))
         conexion.commit()
 
         return jsonify({'message': 'Proveedor eliminado y productos reasignados al proveedor "Nulo".'}), 200
@@ -186,69 +223,69 @@ def eliminar_proveedor(id):
 @app.route('/productos', methods=['POST'])
 def crear_producto():
     data = request.get_json()
-    required_fields = ['user_id', 'name', 'price', 'quantity', 'minimum_stock_level']
+    required_fields = ['userId', 'name', 'price', 'quantity', 'minimumStockLevel']
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'El campo "{field}" es requerido.'}), 400
 
-    user_id = data['user_id']
-    if not validar_usuario(user_id):
-        return jsonify({'error': 'user_id no corresponde a ningún usuario existente.'}), 400
+    userId = data['userId']
+    if not validar_usuario(userId):
+        return jsonify({'error': 'userId no corresponde a ningún usuario existente.'}), 400
 
     try:
         cursor = conexion.cursor()
 
-        # Verificar si el provider_id (si se proporciona) pertenece al usuario
-        provider_id = data.get('provider_id')
-        if provider_id:
-            cursor.execute("SELECT id FROM supplier WHERE id = %s AND user_id = %s", (provider_id, user_id))
+        # Verificar si el providerId (si se proporciona) pertenece al usuario
+        providerId = data.get('providerId')
+        if providerId:
+            cursor.execute("SELECT id FROM Supplier WHERE id = %s AND userId = %s", (providerId, userId))
             proveedor = cursor.fetchone()
             if not proveedor:
-                return jsonify({'error': 'provider_id no corresponde a ningún proveedor de este usuario.'}), 400
+                return jsonify({'error': 'providerId no corresponde a ningún proveedor de este usuario.'}), 400
 
         insert_product = """
-            INSERT INTO product (user_id, provider_id, name, brand, price, quantity, minimum_stock_level, enable)
+            INSERT INTO Product (userId, providerId, name, brand, price, quantity, minimumStockLevel, enable)
             VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE)
         """
         product_data = (
-            user_id,
-            provider_id,
+            userId,
+            providerId,
             data['name'],
             data.get('brand'),
             data['price'],
             data['quantity'],
-            data['minimum_stock_level']
+            data['minimumStockLevel']
         )
         cursor.execute(insert_product, product_data)
         conexion.commit()
-        product_id = cursor.lastrowid
+        productId = cursor.lastrowid
 
         insert_registry = """
-            INSERT INTO modify_registry (user_id, product_id, date, quantity)
+            INSERT INTO ModifyRegistry (userId, productId, date, quantity)
             VALUES (%s, %s, %s, %s)
         """
-        registry_data = (user_id, product_id, date.today(), data['quantity'])
+        registry_data = (userId, productId, date.today(), data['quantity'])
         cursor.execute(insert_registry, registry_data)
         conexion.commit()
-        return jsonify({'message': 'Producto creado y registrado', 'id': product_id}), 201
+        return jsonify({'message': 'Producto creado y registrado', 'id': productId}), 201
     except Error as e:
         return jsonify({'error': str(e)}), 500
 
 # Obtener todos los productos de un usuario
 @app.route('/productos', methods=['GET'])
 def obtener_productos():
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
     try:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute("""
-            SELECT product.*, supplier.name AS supplier_name, supplier.contact_number
-            FROM product
-            LEFT JOIN supplier ON product.provider_id = supplier.id
-            WHERE product.user_id = %s
-        """, (user_id,))
+            SELECT Product.*, Supplier.name AS supplierName, Supplier.contactNumber
+            FROM Product
+            LEFT JOIN Supplier ON Product.providerId = Supplier.id
+            WHERE Product.userId = %s
+        """, (userId,))
         productos = cursor.fetchall()
         return jsonify(productos), 200
     except Error as e:
@@ -257,18 +294,18 @@ def obtener_productos():
 # Obtener un producto por ID y Usuario
 @app.route('/productos/{id}', methods=['GET'])
 def obtener_producto(id):
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
     try:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute("""
-            SELECT product.*, supplier.name AS supplier_name, supplier.contact_number
+            SELECT Product.*, Supplier.name AS supplierName, Supplier.contactNumber
             FROM product
-            LEFT JOIN supplier ON product.provider_id = supplier.id
-            WHERE product.id = %s AND product.user_id = %s
-        """, (id, user_id))
+            LEFT JOIN Supplier ON Product.providerId = Supplier.id
+            WHERE Product.id = %s AND Product.userId = %s
+        """, (id, userId))
         producto = cursor.fetchone()
         if producto:
             return jsonify(producto), 200
@@ -280,7 +317,7 @@ def obtener_producto(id):
 # Actualizar Producto
 @app.route('/productos/{id}', methods=['PUT'])
 def actualizar_producto(id):
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
@@ -289,41 +326,41 @@ def actualizar_producto(id):
         cursor = conexion.cursor()
 
         # Verificar si el producto existe y pertenece al usuario
-        cursor.execute("SELECT * FROM product WHERE id = %s AND user_id = %s", (id, user_id))
+        cursor.execute("SELECT * FROM Product WHERE id = %s AND userId = %s", (id, userId))
         producto = cursor.fetchone()
         if not producto:
             return jsonify({'error': 'Producto no encontrado o no pertenece al usuario especificado.'}), 404
 
-        # Excluir 'enable' y 'user_id' de los campos a actualizar
-        campos = ", ".join(f"{key} = %s" for key in data.keys() if key not in ['enable', 'user_id'])
-        valores = [value for key, value in data.items() if key not in ['enable', 'user_id']]
+        # Excluir 'enable' y 'userId' de los campos a actualizar
+        campos = ", ".join(f"{key} = %s" for key in data.keys() if key not in ['enable', 'userId'])
+        valores = [value for key, value in data.items() if key not in ['enable', 'userId']]
         valores.append(id)
 
         if not campos:
             return jsonify({'error': 'No hay campos para actualizar.'}), 400
 
-        # Si provider_id está siendo actualizado, verificar que pertenezca al usuario
-        if 'provider_id' in data:
-            new_provider_id = data['provider_id']
-            cursor.execute("SELECT id FROM supplier WHERE id = %s AND user_id = %s", (new_provider_id, user_id))
+        # Si providerId está siendo actualizado, verificar que pertenezca al usuario
+        if 'providerId' in data:
+            new_providerId = data['providerId']
+            cursor.execute("SELECT id FROM Supplier WHERE id = %s AND userId = %s", (new_providerId, userId))
             proveedor = cursor.fetchone()
             if not proveedor:
-                return jsonify({'error': 'El nuevo provider_id no corresponde a ningún proveedor de este usuario.'}), 400
+                return jsonify({'error': 'El nuevo providerId no corresponde a ningún proveedor de este usuario.'}), 400
 
-        update_query = f"UPDATE product SET {campos} WHERE id = %s AND user_id = %s"
-        cursor.execute(update_query, valores + [user_id])
+        update_query = f"UPDATE Product SET {campos} WHERE id = %s AND userId = %s"
+        cursor.execute(update_query, valores + [userId])
         conexion.commit()
 
         # Registrar en modify_registry
-        cursor.execute("SELECT quantity FROM product WHERE id = %s AND user_id = %s", (id, user_id))
+        cursor.execute("SELECT quantity FROM Product WHERE id = %s AND userId = %s", (id, userId))
         resultado = cursor.fetchone()
         if resultado:
             current_quantity = resultado[0]
             insert_registry = """
-                INSERT INTO modify_registry (user_id, product_id, date, quantity)
+                INSERT INTO ModifyRegistry (userId, productId, date, quantity)
                 VALUES (%s, %s, %s, %s)
             """
-            registry_data = (user_id, id, date.today(), current_quantity)
+            registry_data = (userId, id, date.today(), current_quantity)
             cursor.execute(insert_registry, registry_data)
             conexion.commit()
 
@@ -334,7 +371,7 @@ def actualizar_producto(id):
 # Eliminar Producto (establecer enable a False)
 @app.route('/productos/{id}', methods=['DELETE'])
 def eliminar_producto(id):
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
@@ -342,7 +379,7 @@ def eliminar_producto(id):
         cursor = conexion.cursor()
 
         # Verificar si el producto existe y pertenece al usuario
-        cursor.execute("SELECT quantity FROM product WHERE id = %s AND user_id = %s", (id, user_id))
+        cursor.execute("SELECT quantity FROM Product WHERE id = %s AND userId = %s", (id, userId))
         producto = cursor.fetchone()
         if not producto:
             return jsonify({'error': 'Producto no encontrado o no pertenece al usuario especificado.'}), 404
@@ -353,17 +390,17 @@ def eliminar_producto(id):
         actualizar_enable = """
             UPDATE product
             SET enable = FALSE
-            WHERE id = %s AND user_id = %s
+            WHERE id = %s AND userId = %s
         """
-        cursor.execute(actualizar_enable, (id, user_id))
+        cursor.execute(actualizar_enable, (id, userId))
         conexion.commit()
 
         # Registrar en modify_registry
         insert_registry = """
-            INSERT INTO modify_registry (user_id, product_id, date, quantity)
+            INSERT INTO ModifyRegistry (userId, productId, date, quantity)
             VALUES (%s, %s, %s, %s)
         """
-        registry_data = (user_id, id, date.today(), current_quantity)
+        registry_data = (userId, id, date.today(), current_quantity)
         cursor.execute(insert_registry, registry_data)
         conexion.commit()
 
@@ -375,16 +412,16 @@ def eliminar_producto(id):
 @app.route('/compras', methods=['POST'])
 def crear_compra():
     data = request.get_json()
-    required_fields = ['user_id', 'products']
+    required_fields = ['userId', 'products']
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'El campo "{field}" es requerido.'}), 400
 
-    user_id = data['user_id']
+    userId = data['userId']
     products = data.get('products', [])
 
-    if not validar_usuario(user_id):
-        return jsonify({'error': 'user_id no corresponde a ningún usuario existente.'}), 400
+    if not validar_usuario(userId):
+        return jsonify({'error': 'userId no corresponde a ningún usuario existente.'}), 400
 
     if not products:
         return jsonify({'error': 'No se proporcionaron productos para la compra.'}), 400
@@ -393,61 +430,61 @@ def crear_compra():
         cursor = conexion.cursor()
         conexion.start_transaction()
 
-        # Crear customer_transaction con user_id
+        # Crear customerTransaction con userId
         insert_transaction = """
-            INSERT INTO customer_transaction (user_id, date)
+            INSERT INTO CustomerTransaction (userId, date)
             VALUES (%s, %s)
         """
-        transaction_data = (user_id, data.get('date', date.today()))
+        transaction_data = (userId, data.get('date', date.today()))
         cursor.execute(insert_transaction, transaction_data)
-        customer_transaction_id = cursor.lastrowid
+        customerTransactionId = cursor.lastrowid
 
         for item in products:
-            product_id = item.get('product_id')
+            productId = item.get('productId')
             quantity = item.get('quantity')
 
-            if not product_id or not quantity:
+            if not productId or not quantity:
                 conexion.rollback()
-                return jsonify({'error': 'Cada producto debe tener "product_id" y "quantity".'}), 400
+                return jsonify({'error': 'Cada producto debe tener "productId" y "quantity".'}), 400
 
             # Verificar si el producto existe, está habilitado y pertenece al usuario
             cursor.execute("""
                 SELECT price, quantity 
-                FROM product 
-                WHERE id = %s AND enable = TRUE AND user_id = %s
-            """, (product_id, user_id))
+                FROM Product 
+                WHERE id = %s AND enable = TRUE AND userId = %s
+            """, (productId, userId))
             producto = cursor.fetchone()
             if not producto:
                 conexion.rollback()
-                return jsonify({'error': f'Producto con ID {product_id} no encontrado, no está habilitado o no pertenece al usuario.'}), 404
+                return jsonify({'error': f'Producto con ID {productId} no encontrado, no está habilitado o no pertenece al usuario.'}), 404
 
             price, available_quantity = producto
 
             if available_quantity < quantity:
                 conexion.rollback()
-                return jsonify({'error': f'Cantidad insuficiente para el producto ID {product_id}.'}), 400
+                return jsonify({'error': f'Cantidad insuficiente para el producto ID {productId}.'}), 400
 
             # Actualizar la cantidad del producto
             new_quantity = available_quantity - quantity
-            cursor.execute("UPDATE product SET quantity = %s WHERE id = %s AND user_id = %s", (new_quantity, product_id, user_id))
+            cursor.execute("UPDATE Product SET quantity = %s WHERE id = %s AND userId = %s", (new_quantity, productId, userId))
 
-            # Insertar en product_transaction
-            insert_product_transaction = """
-                INSERT INTO product_transaction (user_id, product_id, customer_transaction_id, quantity, price)
+            # Insertar en productTransaction
+            insert_productTransaction = """
+                INSERT INTO ProductTransaction (userId, productId, customerTransactionId, quantity, price)
                 VALUES (%s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_product_transaction, (user_id, product_id, customer_transaction_id, quantity, price))
+            cursor.execute(insert_productTransaction, (userId, productId, customerTransactionId, quantity, price))
 
             # Registrar en modify_registry
             insert_registry = """
-                INSERT INTO modify_registry (user_id, product_id, date, quantity)
+                INSERT INTO ModifyRegistry (userId, productId, date, quantity)
                 VALUES (%s, %s, %s, %s)
             """
-            registry_data = (user_id, product_id, date.today(), new_quantity)
+            registry_data = (userId, productId, date.today(), new_quantity)
             cursor.execute(insert_registry, registry_data)
 
         conexion.commit()
-        return jsonify({'message': 'Compra creada exitosamente.', 'customer_transaction_id': customer_transaction_id}), 201
+        return jsonify({'message': 'Compra creada exitosamente.', 'customerTransactionId': customerTransactionId}), 201
     except Error as e:
         conexion.rollback()
         return jsonify({'error': str(e)}), 500
@@ -455,7 +492,7 @@ def crear_compra():
 # Obtener todas las compras (Customer Transactions) de un usuario
 @app.route('/compras', methods=['GET'])
 def obtener_compras():
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
@@ -463,19 +500,19 @@ def obtener_compras():
         cursor = conexion.cursor(dictionary=True)
         cursor.execute("""
             SELECT ct.id, ct.date
-            FROM customer_transaction ct
-            WHERE ct.user_id = %s
-        """, (user_id,))
+            FROM CustomerTransaction ct
+            WHERE ct.userId = %s
+        """, (userId,))
         compras = cursor.fetchall()
 
         # Obtener los productos de cada compra
         for compra in compras:
             cursor.execute("""
-                SELECT pt.id, pt.product_id, p.name, pt.quantity, pt.price
-                FROM product_transaction pt
-                JOIN product p ON pt.product_id = p.id
-                WHERE pt.customer_transaction_id = %s AND pt.user_id = %s
-            """, (compra['id'], user_id))
+                SELECT pt.id, pt.productId, p.name, pt.quantity, pt.price
+                FROM ProductTransaction pt
+                JOIN Product p ON pt.productId = p.id
+                WHERE pt.customerTransactionId = %s AND pt.userId = %s
+            """, (compra['id'], userId))
             productos = cursor.fetchall()
             compra['productos'] = productos
 
@@ -486,7 +523,7 @@ def obtener_compras():
 # Obtener una compra por ID y Usuario
 @app.route('/compras/{id}', methods=['GET'])
 def obtener_compra(id):
-    user_id, error_response, status_code = obtener_usuario()
+    userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
 
@@ -495,21 +532,21 @@ def obtener_compra(id):
         # Verificar si la compra está asociada al usuario
         cursor.execute("""
             SELECT ct.id, ct.date
-            FROM customer_transaction ct
-            WHERE ct.id = %s AND ct.user_id = %s
+            FROM CustomerTransaction ct
+            WHERE ct.id = %s AND ct.userId = %s
             LIMIT 1
-        """, (id, user_id))
+        """, (id, userId))
         compra = cursor.fetchone()
         if not compra:
             return jsonify({'error': 'Compra no encontrada para el usuario especificado.'}), 404
 
         # Obtener los detalles de los productos en la compra
         cursor.execute("""
-            SELECT pt.id, pt.product_id, p.name, pt.quantity, pt.price
-            FROM product_transaction pt
-            JOIN product p ON pt.product_id = p.id
-            WHERE pt.customer_transaction_id = %s AND pt.user_id = %s
-        """, (id, user_id))
+            SELECT pt.id, pt.productId, p.name, pt.quantity, pt.price
+            FROM ProductTransaction pt
+            JOIN Product p ON pt.productId = p.id
+            WHERE pt.customerTransactionId = %s AND pt.userId = %s
+        """, (id, userId))
         productos = cursor.fetchall()
 
         compra['productos'] = productos

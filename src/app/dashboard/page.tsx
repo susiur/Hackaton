@@ -10,8 +10,11 @@ import {
   Truck,
   Users,
 } from 'lucide-react';
+import DashboardClient from './DashboardClient'; 
+import { auth } from '@/auth';
 
-export default function Page() {
+export default async function Page() {
+  const session = await auth();
   const actions = [
     {
       title: 'Administrar productos y su stock',
@@ -49,8 +52,7 @@ export default function Page() {
                 <DollarSign className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$45,231.89</div>
-                <p className="text-xs text-blue-600">+20.1% del mes pasado</p>
+                <DashboardClient userId={session?.user?.id ?? null} /> {/* Usamos el componente cliente */}
               </CardContent>
             </Card>
             <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
@@ -109,10 +111,6 @@ export default function Page() {
             </Button>
           </div>
         </div>
-
-        {/* Decorative elements */}
-        <div className="fixed top-0 right-0 -z-10 w-64 h-64 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="fixed bottom-0 left-0 -z-10 w-64 h-64 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
     </DashboardLayout>
   );

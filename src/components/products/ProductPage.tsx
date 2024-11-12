@@ -8,6 +8,21 @@ export default function ProductPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
 
+  async function handleAddProduct(product: { name: string; quantity: number; price: number; }) {
+    const response = await fetch('http://localhost:5000/productos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({product}),
+    });
+  
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  
+    return await response.json();
+  }
   return (
     <ProductProvider>
       <div className="w-full bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
@@ -18,7 +33,7 @@ export default function ProductPage() {
             isOpen={isAddDialogOpen}
             onOpenChange={setIsAddDialogOpen}
             onSubmit={(product) => {
-              // Lógica de agregar producto
+              handleAddProduct(product);
             }}
           />
         </div>

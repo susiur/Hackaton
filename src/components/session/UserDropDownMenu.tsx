@@ -26,7 +26,7 @@ export default async function UserDropdownMenu() {
               {session.user?.name?.charAt(0) ?? 'U'}
             </AvatarFallback>
           </Avatar>
-          <span>Hola {session?.user?.email}</span>
+          <span>Hola {session?.user?.name}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
