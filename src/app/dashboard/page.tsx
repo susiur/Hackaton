@@ -15,6 +15,7 @@ import { auth } from '@/auth';
 
 export default async function Page() {
   const session = await auth();
+  console.log(session);
   const actions = [
     {
       title: 'Administrar productos y su stock',
@@ -43,42 +44,8 @@ export default async function Page() {
             <p className="text-blue-600">Gestiona tu tienda con facilidad</p>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Ventas Totales
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <DashboardClient userId={session?.user?.id ?? null} /> {/* Usamos el componente cliente */}
-              </CardContent>
-            </Card>
-            <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Productos Vendidos
-                </CardTitle>
-                <ShoppingCart className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">+2350</div>
-                <p className="text-xs text-blue-600">+180 de ayer</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Clientes Activos
-                </CardTitle>
-                <Users className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">+573</div>
-                <p className="text-xs text-blue-600">+201 nuevos esta semana</p>
-              </CardContent>
-            </Card>
+          <div className="mb-8">
+              <DashboardClient userId={session?.user?.id ?? null} /> {/* Usamos el componente cliente */}  
           </div>
 
           <h2 className="text-2xl font-semibold text-blue-800 mb-4">

@@ -1,11 +1,15 @@
 'use client'; 
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DollarSign, ShoppingCart, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const DashboardClient = ({ userId }: { userId: string | null}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalVentas, setTotalVentas] = useState(0);
   const [ventasUltimoMes, setVentasUltimoMes] = useState(0);
+  const [productosVendidos, setProductosVendidos] = useState(0);
+  const [productosAyer, setProductosAyer] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,6 +44,25 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
 
         setVentasUltimoMes(totalUltimoMes);
 
+        // Calcular total de productos vendidos
+        const totalProductos = data.reduce((acc: any, transaction: { productos: any[]; }) => {
+          const transactionTotal = transaction.productos.reduce((sum: number, product: { quantity: number; }) => sum + product.quantity, 0);
+          return acc + transactionTotal;
+        }, 0);
+        setProductosVendidos(totalProductos);
+        // Calcular productos vendidos de ayer
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const productosAyer = data.reduce((acc: any, transaction: { date: string | number | Date; productos: any[]; }) => {
+          const transactionDate = new Date(transaction.date);
+          if (transactionDate >= yesterday) {
+            const transactionTotal = transaction.productos.reduce((sum: number, product: { quantity: number; }) => sum + product.quantity, 0);
+            return acc + transactionTotal;
+          }
+          return acc;
+        }, 0);
+        setProductosAyer(productosAyer);
       } catch (error) {
         console.error('Error fetching compras:', error);
       } finally {
@@ -51,16 +74,60 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
   }, [userId]);
   
     return (
-    <div>
-      {isLoading ? (
-        <p>Cargando...</p>
-      ) : (
-        <div>
-            <div className="text-2xl font-bold">${totalVentas.toFixed(2)}</div>
-            <p className="text-xs text-blue-600">+{ventasUltimoMes/totalVentas*100}% del mes pasado</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Ventas Totales
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div>
+                {isLoading ? (
+                    <p>Cargando...</p>
+                ) : (
+                    <div>
+                        <div className="text-2xl font-bold">${totalVentas.toFixed(2)}</div>
+                        <p className="text-xs text-blue-600">+{(ventasUltimoMes/totalVentas*100).toFixed(2)}% del mes pasado</p>
+                    </div>
+                )}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Productos Vendidos
+                </CardTitle>
+                <ShoppingCart className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div>
+                {isLoading ? (
+                    <p>Cargando...</p>
+                ) : (
+                    <div>
+                        <div className="text-2xl font-bold">+{productosVendidos}</div>
+                        <p className="text-xs text-blue-600">+{productosAyer} de ayer</p>
+                    </div>
+                )}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Clientes Activos
+                </CardTitle>
+                <Users className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">+573</div>
+                <p className="text-xs text-blue-600">+201 nuevos esta semana</p>
+              </CardContent>
+            </Card>
         </div>
-      )}
-    </div>
   );
 };
 

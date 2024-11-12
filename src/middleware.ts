@@ -1,9 +1,11 @@
 // middleware.ts
 import { auth } from '@/auth';
 
-export default auth((req) => {
+export default auth(async (req) => {
   // Si el usuario no está autenticado y la ruta comienza con "/dashboard", redirige al inicio
-  if (!req.auth && req.nextUrl.pathname.startsWith('/dashboard')) {
+  const session = await auth();
+  console.log(session);
+  if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
     const newUrl = new URL('/', req.nextUrl.origin);
     return Response.redirect(newUrl);
   }
