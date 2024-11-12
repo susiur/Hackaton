@@ -1,0 +1,175 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modelo User original con las relaciones para autenticación y las nuevas tablas
+model User {
+  id            String          @id @default(cuid())
+  mail          String?         @unique
+  business_name String?
+
+  name          String?
+  username      String?         @unique
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+
+  accounts             Account[]
+  sessions             Session[]
+  Authenticator        Authenticator[]
+  suppliers            Supplier[]
+  products             Product[]
+  customerTransactions CustomerTransaction[]
+  productTransactions  ProductTransaction[]
+  modifyRegistries     ModifyRegistry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+// Modelo Account para autenticación
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String  @unique
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? @db.Text
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// Modelo Session para autenticación
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Modelo VerificationToken para autenticación
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Modelo Authenticator para soporte WebAuthn
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Supplier {
+  id           Int       @id @default(autoincrement())
+  userId       String
+  name         String
+  contactNumber String?
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Product[] // Relación opuesta a `provider` en `Product`
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Product {
+  id               Int      @id @default(autoincrement())
+  userId           String
+  providerId       Int?
+  name             String
+  brand            String?
+  price            Decimal  @db.Decimal(10, 2)
+  quantity         Int
+  minimumStockLevel Int
+  enable           Boolean
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider Supplier? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+  productTransactions ProductTransaction[]
+  modifyRegistries    ModifyRegistry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+// Modelo CustomerTransaction (Transacciones de Clientes)
+model CustomerTransaction {
+  id     Int     @id @default(autoincrement())
+  userId String
+  date   DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productTransactions ProductTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+// Modelo ProductTransaction (Transacciones de Productos)
+model ProductTransaction {
+  id                    Int     @id @default(autoincrement())
+  userId                String
+  productId             Int
+  customerTransactionId Int
+  quantity              Int
+  price                 Decimal @db.Decimal(10, 2)
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product             Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerTransaction CustomerTransaction  @relation(fields: [customerTransactionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+// Modelo ModifyRegistry (Registro de Modificaciones)
+model ModifyRegistry {
+  id        Int     @id @default(autoincrement())
+  userId    String
+  productId Int
+  date      DateTime
+  quantity  Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
