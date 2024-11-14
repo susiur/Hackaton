@@ -15,6 +15,7 @@ declare module 'next-auth' {
 
 export default {
   providers: [Auth0],
+  trustHost: true,
   callbacks: {
     session: async ({ session, token }) => {
       if (session?.user) {
