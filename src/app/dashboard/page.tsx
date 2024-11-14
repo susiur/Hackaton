@@ -16,7 +16,8 @@ import { auth } from '@/auth';
 export default async function Page() {
   const session = await auth();
   console.log(session);
-  if (session === null){
+  if (session?.user?.id === null){
+    console.log(session);
     // Si no hay sesión, redirige al inicio
     return {
       redirect: {
