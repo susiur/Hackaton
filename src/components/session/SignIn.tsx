@@ -7,8 +7,8 @@ export function SignIn() {
     <form
       action={async () => {
         'use server';
-        const callbackUrl = "/";
-        await signIn('auth0', { callbackUrl });
+        // const callbackUrl = "/";
+        await signIn('auth0'); //, { callbackUrl });
       }}
     >
       <Button

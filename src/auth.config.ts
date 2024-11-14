@@ -15,8 +15,11 @@ declare module 'next-auth' {
 
 export default {
   providers: [Auth0],
-  trustHost: true,
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      //do other stuff or redirects here
+      return url;
+    },
     session: async ({ session, token }) => {
       if (session?.user) {
         session.user.id = token.sub as string; // El sub del token contiene el ID del usuario
