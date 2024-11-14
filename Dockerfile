@@ -17,7 +17,6 @@ RUN npx prisma generate
 # Copia el resto de los archivos del proyecto
 COPY . .
 
-# Construye la aplicación Next.js
 RUN npm run build
 
 # Expone el puerto que usa tu aplicación (por defecto, Next.js usa el puerto 3000)
