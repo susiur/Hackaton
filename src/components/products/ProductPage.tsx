@@ -76,7 +76,17 @@ export default function ProductPage() {
           onOpenChange={setIsEditDialogOpen}
           initialProduct={currentProduct}
           onSubmit={(product) => {
-            handleEditProduct(product);
+            // if the product id is null, do nothing
+            if (!product.id || !product.userId) return;
+            let product_re = {
+              id: product.id,
+              name: product.name,
+              quantity: product.quantity,
+              price: product.price,
+              minimumStockLevel: product.minimumStockLevel,
+              userId: product.userId
+            }
+            handleEditProduct(product_re);
           }}
         />
       </div>

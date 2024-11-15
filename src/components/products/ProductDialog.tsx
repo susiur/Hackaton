@@ -14,7 +14,9 @@ type ProductDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   initialProduct?: { id?: number; name: string; quantity: number; price: number; minimumStockLevel: number; userId?: string } | null;
-  onSubmit: (product: { id?: number; name: string; quantity: number; price: number; minimumStockLevel: number  }) => void;
+  onSubmit: (product: {
+    userId?: string; id?: number; name: string; quantity: number; price: number; minimumStockLevel: number  
+}) => void;
 };
 
 export default function ProductDialog({
