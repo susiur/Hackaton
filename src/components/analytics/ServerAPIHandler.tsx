@@ -1,7 +1,7 @@
 // src/components/analytics/ServerAPIHandler.tsx
 
 export async function getPredictionData(userId: string | null, startDate: string, endDate: string) {
-  const response = await fetch('https://ec75-201-184-144-194.ngrok-free.app/predict', {
+  const response = await fetch('https://hackaton-v20o.onrender.com/predict', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
