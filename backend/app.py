@@ -13,7 +13,7 @@ from main import ModeloDemanda
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 # Configuración de la conexión a MySQL utilizando variables de entorno
 import os
@@ -315,8 +315,17 @@ def obtener_producto(id):
         return jsonify({'error': str(e)}), 500
 
 # Actualizar Producto
-@app.route('/productos/{id}', methods=['PUT'])
+@app.route('/productos/<int:id>', methods=['OPTIONS', 'PUT'])
 def actualizar_producto(id):
+    if request.method == 'OPTIONS':
+        # Responder a la solicitud de preflight
+        response = jsonify({'message': 'CORS preflight response'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'PUT, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        return response
+
+    # Código para manejar la solicitud PUT
     userId, error_response, status_code = obtener_usuario()
     if error_response:
         return error_response, status_code
