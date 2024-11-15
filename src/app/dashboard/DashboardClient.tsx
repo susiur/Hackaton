@@ -17,7 +17,7 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/compras?userId=${userId}`);
+        const response = await fetch(`https://hackaton-v20o.onrender.com/compras?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Error al obtener compras');
         }

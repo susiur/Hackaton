@@ -9,7 +9,7 @@ export default function ProductPage() {
   const [currentProduct, setCurrentProduct] = useState(null);
 
   async function handleAddProduct(product: { name: string; quantity: number; price: number; }) {
-    const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/productos', {
+    const response = await fetch('https://hackaton-v20o.onrender.com/productos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
