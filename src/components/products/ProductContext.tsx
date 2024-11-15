@@ -46,7 +46,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`http://NEXT_PUBLIC_API_URL/productos?userId=${userId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/productos?userId=${userId}`);
         if (!response.ok) throw new Error('Error al obtener productos');
         
         const data = await response.json();

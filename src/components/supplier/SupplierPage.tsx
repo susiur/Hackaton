@@ -28,7 +28,7 @@ export default function SupplierPage() {
     const fetchSuppliers = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://NEXT_PUBLIC_API_URL/providers?userId=${userId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/providers?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Error al obtener proveedores');
         }
@@ -47,7 +47,7 @@ export default function SupplierPage() {
   // Crear proveedor
   const handleAddSupplier = async (newSupplier: any) => {
     try {
-      const response = await fetch(`http://NEXT_PUBLIC_API_URL/providers`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/providers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, ...newSupplier }),
@@ -68,7 +68,7 @@ export default function SupplierPage() {
   // Eliminar proveedor
   const handleDeleteSupplier = async (id: any) => {
     try {
-      const response = await fetch(`http://NEXT_PUBLIC_API_URL/providers/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/providers/${id}`, {
         method: 'DELETE',
       });
 
