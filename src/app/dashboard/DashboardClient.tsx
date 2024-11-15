@@ -10,12 +10,14 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
   const [ventasUltimoMes, setVentasUltimoMes] = useState(0);
   const [productosVendidos, setProductosVendidos] = useState(0);
   const [productosAyer, setProductosAyer] = useState(0);
+  const [promedioTransaccionesDiarias, setPromedioTransaccionesDiarias] = useState(0);
+  const [transaccionesAyer, setTransaccionesAyer] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/compras?userId=${userId}`);
+        const response = await fetch(`http://NEXT_PUBLIC_API_URL/compras?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Error al obtener compras');
         }
@@ -63,6 +65,26 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
           return acc;
         }, 0);
         setProductosAyer(productosAyer);
+
+        // Calcular promedio de transacciones diarias
+        const transaccionesDiarias = data.reduce((acc: any, transaction: { date: string | number | Date; }) => {
+          const transactionDate = new Date(transaction.date);
+          if (transactionDate >= yesterday) {
+            return acc + 1;
+          }
+          return acc;
+        }, 0);
+        setPromedioTransaccionesDiarias(transaccionesDiarias / 30);
+
+        // Calcular transacciones de ayer
+        const transaccionesAyer = data.reduce((acc: any, transaction: { date: string | number | Date; }) => {
+          const transactionDate = new Date(transaction.date);
+          if (transactionDate >= yesterday) {
+            return acc + 1;
+          }
+          return acc;
+        }, 0);
+        setTransaccionesAyer(transaccionesAyer);
       } catch (error) {
         console.error('Error fetching compras:', error);
       } finally {
@@ -118,13 +140,21 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
             <Card className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Clientes Activos
+                  Transacciones Diarias
                 </CardTitle>
                 <Users className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">+573</div>
-                <p className="text-xs text-blue-600">+201 nuevos esta semana</p>
+                <div>
+                {isLoading ? (
+                    <p>Cargando...</p>
+                ) : (
+                    <div>
+                    <div className="text-2xl font-bold">{promedioTransaccionesDiarias.toFixed(2)}</div>
+                    <p className="text-xs text-blue-600">+{transaccionesAyer} de ayer</p>
+                    </div>
+                )}
+                </div>
               </CardContent>
             </Card>
         </div>

@@ -9,7 +9,7 @@ export default function ProductPage() {
   const [currentProduct, setCurrentProduct] = useState(null);
 
   async function handleAddProduct(product: { name: string; quantity: number; price: number; }) {
-    const response = await fetch('http://localhost:5000/productos', {
+    const response = await fetch('http://NEXT_PUBLIC_API_URL/productos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
