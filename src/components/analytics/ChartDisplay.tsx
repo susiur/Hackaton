@@ -84,8 +84,8 @@ export default function ChartDisplay({
 
   useEffect(() => {
     if (productId !== null) {
-      const filtered = predictedData.filter((data) => data.productId === productId);
-
+      const filtered = predictedData.filter((data) => data.productId === productId); 
+      console.log("llamando")
       // Agrupar datos según el filtro de tiempo
       let groupedData = filtered;
       if (timeFilter === 'month') {

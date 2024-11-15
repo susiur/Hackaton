@@ -15,7 +15,7 @@ export default function ProductPage() {
       product.userId = userId;
     }
     console.log(product);
-    const response = await fetch('https://hackaton-v20o.onrender.com/productos', {
+    const response = await fetch('https://ec75-201-184-144-194.ngrok-free.app/productos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export default function ProductPage() {
       product.userId = userId;
     }
     console.log(product);
-    const response = await fetch(`https://hackaton-v20o.onrender.com/productos/${product.id}`, {
+    const response = await fetch(`https://ec75-201-184-144-194.ngrok-free.app/productos/${product.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

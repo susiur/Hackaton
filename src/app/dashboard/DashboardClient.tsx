@@ -17,7 +17,7 @@ const DashboardClient = ({ userId }: { userId: string | null}) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://hackaton-v20o.onrender.com/compras?userId=${userId}`);
+        const response = await fetch(`https://ec75-201-184-144-194.ngrok-free.app/compras?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Error al obtener compras');
         }

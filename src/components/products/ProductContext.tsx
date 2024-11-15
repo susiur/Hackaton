@@ -48,7 +48,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`https://hackaton-v20o.onrender.com/productos?userId=${userId}`);
+        const response = await fetch(`https://ec75-201-184-144-194.ngrok-free.app/productos?userId=${userId}`);
         if (!response.ok) throw new Error('Error al obtener productos');
         
         const data = await response.json();
