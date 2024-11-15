@@ -22,11 +22,11 @@ from mysql.connector import Error
 
 try:
     conexion = mysql.connector.connect(
-        host=os.getenv('MYSQL_HOST', 'localhost'),  # Solo 'localhost' sin puerto
-        port=3307,  # Se especifica el puerto aquí
-        user=os.getenv('MYSQL_USER', 'root'),
-        password=os.getenv('MYSQL_PASSWORD', 'root'),
-        database=os.getenv('MYSQL_DATABASE', 'hackaton')
+        host=os.getenv('MYSQL_HOST'),
+        port=3306, 
+        user=os.getenv('MYSQL_USER'),
+        password=os.getenv('MYSQL_PASSWORD'),
+        database=os.getenv('MYSQL_DATABASE')
     )
     if conexion.is_connected():
         print('Conexión exitosa a MySQL')
