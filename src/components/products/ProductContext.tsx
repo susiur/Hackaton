@@ -3,8 +3,10 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 
 type Product = {
   id: number;
+  userId?: string;
   name: string;
   quantity: number;
+  minimumStockLevel: number;
   price: number;
 };
 
@@ -20,9 +22,9 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const { userId } = useAuth();
   const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: 'Arroz', quantity: 100, price: 2.5 },
-    { id: 2, name: 'Frijoles', quantity: 80, price: 1.8 },
-    { id: 3, name: 'Aceite', quantity: 50, price: 3.2 },
+    { id: 1, name: 'Arroz', quantity: 100, price: 2.5, minimumStockLevel: 10 },
+    { id: 2, name: 'Frijoles', quantity: 80, price: 1.8 , minimumStockLevel: 10},
+    { id: 3, name: 'Aceite', quantity: 50, price: 3.2 , minimumStockLevel: 10},
   ]);
 
   const addProduct = (product: Product) => {

@@ -34,7 +34,7 @@ export default function ProductTable({ onEdit }: Props) {
             <TableCell>{product.quantity}</TableCell>
             <TableCell>${product.price}</TableCell>
             <TableCell>
-              <Button variant="ghost" size="sm" onClick={() => onEdit(product)}>
+              <Button variant="ghost" size="sm" onClick={() =>{console.log("Alo?") ;onEdit(product)}}>
                 <Edit className="h-4 w-4" />
               </Button>
               <Button

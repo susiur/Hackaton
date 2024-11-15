@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
 type ProductFormProps = {
-  initialProduct?: { name: string; quantity: number; price: number } | null;
-  onSubmit: (product: { name: string; quantity: number; price: number }) => void;
+  initialProduct?: { name: string; quantity: number; price: number; minimumStockLevel: number } | null;
+  onSubmit: (product: { name: string; quantity: number; price: number; minimumStockLevel: number }) => void;
   onClose: () => void;
 };
 
@@ -15,7 +15,7 @@ export default function ProductForm({
   onClose,
 }: ProductFormProps) {
   const [product, setProduct] = useState(
-    initialProduct || { name: '', quantity: 0, price: 0 }
+    initialProduct || { name: '', quantity: 0, price: 0, minimumStockLevel:0 }
   );
 
   useEffect(() => {
@@ -49,6 +49,18 @@ export default function ProductForm({
             onChange={(e) =>
               setProduct({ ...product, quantity: parseInt(e.target.value) })
             }
+            className="col-span-3"
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="minimumStockLevel" className="text-right">
+            Stock mínimo
+          </Label>
+          <Input
+            id="minimumStockLevel"
+            type="number"
+            value={product.minimumStockLevel}
+            onChange={(e) => setProduct({ ...product, minimumStockLevel: parseInt(e.target.value) })}
             className="col-span-3"
           />
         </div>
