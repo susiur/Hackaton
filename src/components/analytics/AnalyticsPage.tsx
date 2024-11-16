@@ -173,11 +173,6 @@ export default function AnalyticsPage() {
               <option value="day">Diario</option>
             </select>
           </div>
-          <ChartDisplay
-            productId={selectedProductId}
-            timeFilter={timeFilter}
-            predictedData={predictedData}
-          />
           <div className="flex justify-center">
             <button
               onClick={handlePredictClick}
@@ -189,6 +184,11 @@ export default function AnalyticsPage() {
           {predictionComplete && (
             <div className="mt-4 text-green-500">Predicción completada exitosamente.</div>
           )}
+          <ChartDisplay
+            productId={selectedProductId}
+            timeFilter={timeFilter}
+            predictedData={predictedData}
+            />
         </div>
       </div>
     </ProductProvider>
