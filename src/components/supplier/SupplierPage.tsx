@@ -68,6 +68,8 @@ export default function SupplierPage() {
   // Eliminar proveedor
   const handleDeleteSupplier = async (id: any) => {
     try {
+      console.log(id);
+      console.log((prev: any[]) => prev.filter((supplier) => supplier.id == id));
       const response = await fetch(`https://hackaton-v20o.onrender.com/providers/${id}`, {
         method: 'DELETE',
       });
