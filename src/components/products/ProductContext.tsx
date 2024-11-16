@@ -1,7 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
 
 type Product = {
   id: number;
@@ -17,6 +15,7 @@ type ProductContextType = {
   addProduct: (product: Product) => void;
   editProduct: (product: Product) => void;
   deleteProduct: (id: number) => void;
+  refreshProducts: () => void;
 };
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -25,10 +24,9 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const { userId } = useAuth();
   const [products, setProducts] = useState<Product[]>([
     { id: 1, name: 'Arroz', quantity: 100, price: 2.5, minimumStockLevel: 10 },
-    { id: 2, name: 'Frijoles', quantity: 80, price: 1.8 , minimumStockLevel: 10},
-    { id: 3, name: 'Aceite', quantity: 50, price: 3.2 , minimumStockLevel: 10},
+    { id: 2, name: 'Frijoles', quantity: 80, price: 1.8, minimumStockLevel: 10 },
+    { id: 3, name: 'Aceite', quantity: 50, price: 3.2, minimumStockLevel: 10 },
   ]);
-
   const addProduct = (product: Product) => {
     setProducts((prev) => [...prev, { ...product, id: Date.now() }]);
   };
@@ -44,7 +42,9 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const deleteProduct = (id: number) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
   };
+
   const fetchProducts = async () => {
+    if (!userId) return;
     try {
       const response = await fetch(`https://hackaton-v20o.onrender.com/productos?userId=${userId}`);
       if (!response.ok) throw new Error('Error al obtener productos');
@@ -55,21 +55,24 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error fetching products:', error);
     }
   };
+
+  // Function to refresh the products
+  const refreshProducts = () => {
+    fetchProducts();
+  };
+
   useEffect(() => {
     fetchProducts();
   }, [userId]);
 
+  const contextValue = useMemo(
+    () => ({ products, addProduct, editProduct, deleteProduct, refreshProducts }),
+    [products]
+  );
   return (
-    <div>
-      <button onClick={fetchProducts} className="text-gray-500">
-        <FontAwesomeIcon icon={faSyncAlt} size="lg" />
-      </button>
-    <ProductContext.Provider
-      value={{ products, addProduct, editProduct, deleteProduct }}
-    >
+    <ProductContext.Provider value={contextValue}>
       {children}
     </ProductContext.Provider>
-    </div>
   );
 };
 
