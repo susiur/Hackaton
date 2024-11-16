@@ -14,7 +14,7 @@ export default function ProductPage() {
     if (userId) {
       product.userId = userId;
     }
-    console.log(product);
+    console.log(JSON.stringify({product}));
     const response = await fetch('https://hackaton-v20o.onrender.com/productos', {
       method: 'POST',
       headers: {
