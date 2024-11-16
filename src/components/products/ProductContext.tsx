@@ -39,8 +39,17 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const deleteProduct = (id: number) => {
+  const deleteProduct = async (id: number) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
+    console.log(id);
+    const response = await fetch(`https://hackaton-v20o.onrender.com/productos/${id}`, {method: 'DELETE'});
+  
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  
+    return await response.json();
+    
   };
 
   const fetchProducts = async () => {
