@@ -1,5 +1,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Product = {
   id: number;
@@ -42,31 +44,32 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const deleteProduct = (id: number) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
   };
-
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`https://hackaton-v20o.onrender.com/productos?userId=${userId}`);
+      if (!response.ok) throw new Error('Error al obtener productos');
+      
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
   useEffect(() => {
-    if (!userId) return;
-    
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(`https://hackaton-v20o.onrender.com/productos?userId=${userId}`);
-        if (!response.ok) throw new Error('Error al obtener productos');
-        
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
-
     fetchProducts();
   }, [userId]);
 
   return (
+    <div>
+      <button onClick={fetchProducts} className="text-gray-500">
+        <FontAwesomeIcon icon={faSyncAlt} size="lg" />
+      </button>
     <ProductContext.Provider
       value={{ products, addProduct, editProduct, deleteProduct }}
     >
       {children}
     </ProductContext.Provider>
+    </div>
   );
 };
 
